@@ -1,4 +1,4 @@
-# KHG Print Probe — Android Studio prototype
+# Printin' KHG — Android Studio prototype
 
 Purpose: determine whether the existing KHG CUPS queue will accept direct IPP requests and PDF print jobs from Android **without installing a native Linux driver**.
 
