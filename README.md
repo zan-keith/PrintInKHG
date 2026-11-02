@@ -29,6 +29,19 @@ The repository history is organized by milestone:
 - `feat(ui): migrate screens to Compose Material 3`
 - `polish(identity): add KHG launcher logo and app icon`
 
+## Resident setup and support
+
+This is an unofficial app made with ♥ by zan-keith: https://github.com/zan-keith
+
+The in-app setup page links to the resident resources below:
+
+- Homepage for residents: https://davinci.khg.jku.at
+- KHG-Dormlife: https://khg-dormlife.club/
+- Internal mailing list: tratsch@khg.jku.at (residents are automatically assigned)
+- Questions or problems: admin@khg.jku.at, or contact one of the admins directly
+
+The configured printer endpoint and queue may change over time. If the app stops connecting, check the current KHG instructions or contact an admin; do not assume that the old URL or queue name is still valid.
+
 ## Important limitations
 - **Not tested on the KHG network, a device, or Android SDK.** It is source code, not a tested APK.
 - Supports HTTP Basic authentication only. If the server responds with `WWW-Authenticate: Digest`, add a correct Digest handler or a vetted compatible IPP client. Never disable authentication.
