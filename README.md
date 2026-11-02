@@ -17,6 +17,18 @@ Purpose: determine whether the existing KHG CUPS queue will accept direct IPP re
 5. Enter your KHG username/password. Tap `Check IPP printer capabilities` **before** attempting a print.
 6. If successful and `application/pdf` is listed, try a **one-page PDF** using `Choose PDF to print`.
 
+## Current UI architecture
+
+The app UI is implemented with Jetpack Compose and Material 3. The flow is split into onboarding, home, printer connection, PDF preparation, print review, and job status screens. Credentials are encrypted with Android Keystore when the user chooses to remember them.
+
+The repository history is organized by milestone:
+
+- `chore: initialize KHG print prototype`
+- `build: add reproducible Gradle wrapper`
+- `feat(print): support page ranges and print options`
+- `feat(ui): migrate screens to Compose Material 3`
+- `polish(identity): add KHG launcher logo and app icon`
+
 ## Important limitations
 - **Not tested on the KHG network, a device, or Android SDK.** It is source code, not a tested APK.
 - Supports HTTP Basic authentication only. If the server responds with `WWW-Authenticate: Digest`, add a correct Digest handler or a vetted compatible IPP client. Never disable authentication.
