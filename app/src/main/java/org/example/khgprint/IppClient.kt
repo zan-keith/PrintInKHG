@@ -68,7 +68,7 @@ class IppClient {
             ?: error("Cannot open selected PDF")
         val firstAttempt = runCatching { post(username, password, request, pdf) }
         val result = firstAttempt.getOrNull()
-        val httpRetry = (firstAttempt.exceptionOrNull() as? HttpResponseException)?.code in setOf(400, 411)
+        val httpRetry = (firstAttempt.exceptionOrNull() as? HttpResponseException)?.code in setOf(400, 411, 502)
         if (result != null && !result.isOptionalAttributesError() && !httpRetry) return result
         if (result == null && !httpRetry) throw firstAttempt.exceptionOrNull()!!
 
@@ -168,12 +168,12 @@ class IppClient {
                 } else {
                     "Server returned HTTP $code (${connection.responseMessage})."
                 }
-                val body = connection.errorStream?.use { it.readBytes() }
+                val body = if (code < 500) connection.errorStream?.use { it.readBytes() }
                     ?.toString(Charsets.UTF_8)
                     ?.trim()
                     ?.takeIf { it.isNotEmpty() }
                     ?.let { " Response: ${it.take(240)}" }
-                    .orEmpty()
+                    .orEmpty() else ""
                 throw HttpResponseException(code, extra + body)
             }
             val mime = connection.contentType.orEmpty().lowercase()

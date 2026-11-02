@@ -176,7 +176,7 @@ private fun PrintApp(activity: Activity) {
                                 activityStatus = when {
                                     printSucceeded -> "Print job accepted"
                                     result != null -> "Printer rejected the print request"
-                                    else -> "Print failed · ${attempt.exceptionOrNull()?.message ?: "Could not reach the printer"}"
+                                    else -> friendlyPrintFailure(attempt.exceptionOrNull())
                                 }
                                 page = Page.RESULT
                             }
@@ -290,6 +290,17 @@ private fun PrintApp(activity: Activity) {
 
 private fun openExternal(activity: Activity, value: String) {
     runCatching { activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(value))) }
+}
+
+private fun friendlyPrintFailure(error: Throwable?): String {
+    val message = error?.message.orEmpty()
+    return when {
+        "HTTP 502" in message || "HTTP 503" in message || "HTTP 504" in message ->
+            "Printer service is temporarily unavailable. Check KHG-WiFi and try again."
+        "HTTP 400" in message || "HTTP 411" in message ->
+            "Printer rejected this PDF request. Try one page or review the print settings."
+        else -> "Print failed. Check KHG-WiFi, printer access and saved credentials."
+    }
 }
 
 private fun displayName(resolver: android.content.ContentResolver, uri: Uri): String {
