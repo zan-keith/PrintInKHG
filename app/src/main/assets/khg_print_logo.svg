@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">KHG Print</title>
+  <desc id="desc">A vector mark combining a printer, graduation cap, and printed page.</desc>
+  <defs>
+    <linearGradient id="cap" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#31D5F5"/><stop offset="1" stop-color="#7651F5"/></linearGradient>
+    <clipPath id="tileClip"><rect x="24" y="24" width="464" height="464" rx="112"/></clipPath>
+  </defs>
+  <rect x="24" y="24" width="464" height="464" rx="112" fill="#08142F"/>
+  <g clip-path="url(#tileClip)">
+    <path d="M-10 250C89 185 130 82 255 10L-10 0Z" fill="#5A36B9" opacity=".72"/>
+    <path d="M260 520C355 435 408 411 530 360V530Z" fill="#087CF5" opacity=".62"/>
+    <path d="M24 198C116 147 145 86 211 24" fill="none" stroke="#A67CFF" stroke-width="2" opacity=".55"/>
+    <path d="M118 170L256 102L394 170L256 238Z" fill="url(#cap)"/>
+    <path d="M166 202L256 247L346 202V251C346 276 306 293 256 293S166 276 166 251Z" fill="url(#cap)"/>
+    <path d="M365 178V238" stroke="#7651F5" stroke-width="10" stroke-linecap="round"/>
+    <path d="M365 232C354 232 346 240 346 251V267H384V251C384 240 376 232 365 232Z" fill="#7651F5"/>
+    <path d="M142 244H370C397 244 418 265 418 292V351C418 378 397 396 370 396H142C115 396 94 378 94 351V292C94 265 115 244 142 244Z" fill="#F7F9FF"/>
+    <path d="M145 283H367C378 283 387 292 387 303V334C387 345 378 354 367 354H145C134 354 125 345 125 334V303C125 292 134 283 145 283Z" fill="#08142F"/>
+    <circle cx="352" cy="265" r="9" fill="#314064"/><circle cx="380" cy="265" r="9" fill="#314064"/>
+    <path d="M173 331H339L367 447C370 460 360 472 347 472H165C152 472 142 460 145 447Z" fill="#F7F9FF"/>
+    <rect x="184" y="373" width="144" height="13" rx="6.5" fill="#5068B4"/><rect x="184" y="402" width="144" height="13" rx="6.5" fill="#5068B4"/><rect x="184" y="431" width="88" height="13" rx="6.5" fill="#5068B4"/>
+  </g>
+</svg>
