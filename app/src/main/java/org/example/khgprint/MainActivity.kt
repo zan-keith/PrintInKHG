@@ -80,7 +80,7 @@ private fun PrintApp(activity: Activity) {
     var printSucceeded by rememberSaveable { mutableStateOf(false) }
     var confirmEditorExit by rememberSaveable { mutableStateOf(false) }
     var loginReturnPage by rememberSaveable { mutableStateOf(Page.HOME) }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         pdf = uri
         fileName = displayName(activity.contentResolver, uri)
@@ -132,7 +132,7 @@ private fun PrintApp(activity: Activity) {
 
     val openLogin = { loginReturnPage = page; page = Page.LOGIN; error = null }
     val openPdf = {
-        if (store.hasCredentials()) picker.launch(arrayOf("application/pdf")) else openLogin()
+        if (store.hasCredentials()) picker.launch("application/pdf") else openLogin()
     }
     Scaffold(
         containerColor = KHGBackground,
@@ -160,7 +160,7 @@ private fun PrintApp(activity: Activity) {
                             }
                         }
                     }, { page = Page.HOME })
-                    Page.EDITOR -> EditorScreen(fileName, pageRange, copies, duplex, colorMode, { pageRange = it }, { copies = it }, { duplex = it }, { colorMode = it }, { page = Page.OPTIONS }, { picker.launch(arrayOf("application/pdf")) })
+                    Page.EDITOR -> EditorScreen(fileName, pageRange, copies, duplex, colorMode, { pageRange = it }, { copies = it }, { duplex = it }, { colorMode = it }, { page = Page.OPTIONS }, { picker.launch("application/pdf") })
                     Page.OPTIONS -> OptionsScreen(fileName, pageRange.ifBlank { "All pages" }, copies, duplex, colorMode, printerStatus, busy, { page = Page.EDITOR }) {
                         val credentials = store.read()
                         val uri = pdf
@@ -296,10 +296,11 @@ private fun displayName(resolver: android.content.ContentResolver, uri: Uri): St
     resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
         if (cursor.moveToFirst()) {
             val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (index >= 0) cursor.getString(index)?.takeIf { it.isNotBlank() }?.let { return it }
+            if (index >= 0) cursor.getString(index)?.takeIf { it.isNotBlank() && !it.matches(Regex("document:\\d+")) }?.let { return it }
         }
     }
-    return uri.lastPathSegment?.substringAfterLast('/') ?: "Selected PDF"
+    return uri.lastPathSegment?.substringAfterLast('/')?.takeIf { !it.matches(Regex("document:\\d+")) }
+        ?: "Selected PDF"
 }
 
 private val KHGBackground=Color(0xfff7f8fa); private val KHGInk=Color(0xff172033); private val KHGTeal=Color(0xff168c83); private val KHGMuted=Color(0xff667085)
