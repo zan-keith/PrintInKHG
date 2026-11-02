@@ -39,10 +39,23 @@ class IppClient {
         return post(username, password, request, null)
     }
 
-    fun printPdf(username: String, password: String, resolver: ContentResolver, pdfUri: Uri): IppReply {
+    fun printPdf(
+        username: String,
+        password: String,
+        resolver: ContentResolver,
+        pdfUri: Uri,
+        pageRange: String = "All pages",
+        copies: Int = 1,
+        duplex: Boolean = false,
+        colorMode: String = "Color"
+    ): IppReply {
         val request = makeRequest(0x0002, username) { out ->
             addAttribute(out, 0x42, "job-name", "KHG Android PDF")
             addAttribute(out, 0x49, "document-format", "application/pdf")
+            addAttribute(out, 0x21, "copies", copies.toString())
+            addAttribute(out, 0x44, "sides", if (duplex) "two-sided-long-edge" else "one-sided")
+            addAttribute(out, 0x44, "print-color-mode", if (colorMode == "Color") "color" else "monochrome")
+            if (pageRange != "All pages") addAttribute(out, 0x44, "page-ranges", pageRange)
         }
         val pdf = resolver.openInputStream(pdfUri) ?: error("Cannot open selected PDF")
         return pdf.use { post(username, password, request, it) }
