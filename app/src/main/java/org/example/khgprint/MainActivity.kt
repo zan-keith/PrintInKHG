@@ -16,6 +16,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,7 +30,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -176,7 +179,7 @@ private fun PrintApp(activity: Activity) {
     } }
 }
 
-@Composable private fun AppTopBar(page: Page, onBack: () -> Unit) { if(page != Page.HOME) TopAppBar(title = { Text(when(page){Page.CONNECT->"Connect & setup";Page.TUTORIAL->"How to print";Page.SETTINGS->"Settings";Page.ABOUT->"About & developer";Page.LOGIN->"Connect printer";Page.EDITOR->"Prepare PDF";Page.OPTIONS->"Print options";Page.RESULT->"Job status";else->"KHG Print"}, fontWeight = FontWeight.Bold) }, navigationIcon = { IconButton(onBack) { Icon(Icons.Default.ArrowBack, "Back") } }, colors = TopAppBarDefaults.topAppBarColors(containerColor = KHGBackground, titleContentColor = KHGInk)) else TopAppBar(title={Row(verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.Print,null,tint=KHGTeal,modifier=Modifier.size(26.dp));Spacer(Modifier.width(10.dp));Text("KHG Print",fontWeight=FontWeight.Bold)}},colors=TopAppBarDefaults.topAppBarColors(containerColor=KHGBackground,titleContentColor=KHGInk)) }
+@Composable private fun AppTopBar(page: Page, onBack: () -> Unit) { if(page != Page.HOME) TopAppBar(title = { Text(when(page){Page.CONNECT->"Connect & setup";Page.TUTORIAL->"How to print";Page.SETTINGS->"Settings";Page.ABOUT->"About & developer";Page.LOGIN->"Connect printer";Page.EDITOR->"Prepare PDF";Page.OPTIONS->"Print options";Page.RESULT->"Job status";else->"KHG Print"}, fontWeight = FontWeight.Bold) }, navigationIcon = { IconButton(onBack) { Icon(Icons.Default.ArrowBack, "Back") } }, colors = TopAppBarDefaults.topAppBarColors(containerColor = KHGBackground, titleContentColor = KHGInk)) else TopAppBar(title={Row(verticalAlignment=Alignment.CenterVertically){Image(painterResource(R.drawable.ic_khg_logo),"KHG Print logo",modifier=Modifier.size(28.dp).clip(RoundedCornerShape(8.dp)));Spacer(Modifier.width(10.dp));Text("KHG Print",fontWeight=FontWeight.Bold)}},colors=TopAppBarDefaults.topAppBarColors(containerColor=KHGBackground,titleContentColor=KHGInk)) }
 
 @Composable private fun HomeScreen(status:String, activity:String, hasLogin:Boolean, login:()->Unit, pick:()->Unit, clear:()->Unit) { LazyColumn(Modifier.fillMaxSize(), contentPadding=PaddingValues(20.dp), verticalArrangement=Arrangement.spacedBy(16.dp)) { item { Text("What are you printing today?", style=MaterialTheme.typography.headlineMedium, color=KHGInk, fontWeight=FontWeight.Bold); Text("Your documents stay on your device until you send them.", style=MaterialTheme.typography.bodyMedium, color=KHGMuted) }; item { ElevatedCard(shape=RoundedCornerShape(20.dp), colors=CardDefaults.elevatedCardColors(containerColor=Color.White)) { Column(Modifier.padding(20.dp)) { Row(verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.Wifi, null, tint=KHGTeal);Spacer(Modifier.width(12.dp));Column{Text("PRINTER CONNECTION",style=MaterialTheme.typography.labelMedium,color=KHGMuted);Text(status,style=MaterialTheme.typography.titleMedium,color=KHGInk,fontWeight=FontWeight.SemiBold)}};Spacer(Modifier.height(16.dp));OutlinedButton(onClick=login,Modifier.fillMaxWidth(),shape=RoundedCornerShape(12.dp)){Text(if(hasLogin)"Check printer again" else "Connect printer")}} } }; item { Button(onClick=pick,Modifier.fillMaxWidth().height(58.dp),shape=RoundedCornerShape(16.dp),colors=ButtonDefaults.buttonColors(containerColor=KHGTeal)){Icon(Icons.Default.Add,null);Spacer(Modifier.width(8.dp));Text("Choose a PDF",fontWeight=FontWeight.Bold)} }; item { Text("Tip  ·  Start with a one-page PDF while testing.",style=MaterialTheme.typography.bodySmall,color=KHGMuted,modifier=Modifier.padding(horizontal=4.dp)) }; item { OutlinedCard(shape=RoundedCornerShape(20.dp),colors=CardDefaults.outlinedCardColors(containerColor=Color.Transparent)){Column(Modifier.padding(20.dp)){Text("LATEST ACTIVITY",style=MaterialTheme.typography.labelMedium,color=KHGMuted);Spacer(Modifier.height(8.dp));Text(activity,style=MaterialTheme.typography.bodyLarge,color=KHGInk)}}} ; item { TextButton(onClick=clear){Text("Clear saved login",color=KHGTeal)} } } }
 
