@@ -5,6 +5,8 @@
         android:label="KHG Print Probe"
         android:allowBackup="false"
         android:usesCleartextTraffic="false"
+        android:icon="@drawable/ic_khg_logo"
+        android:roundIcon="@drawable/ic_khg_logo"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
             android:name=".MainActivity"
