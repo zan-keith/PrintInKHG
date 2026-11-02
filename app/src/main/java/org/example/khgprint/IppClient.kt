@@ -24,7 +24,12 @@ class IppClient {
     data class IppReply(val status: Int, val attributes: Map<String, List<String>>) {
         fun values(name: String): String = attributes[name]?.joinToString(", ") ?: "not provided"
         fun isSuccess(): Boolean = status in 0x0000..0x00ff
-        fun summary(): String = "IPP status: 0x%04x".format(status)
+        fun isOptionalAttributesError(): Boolean = status == 0x0400 || status == 0x040b
+        fun summary(): String {
+            val message = attributes["status-message"]?.firstOrNull()
+            return "IPP status: 0x%04x".format(status) +
+                if (message.isNullOrBlank()) "" else " · $message"
+        }
     }
 
     fun check(username: String, password: String): IppReply {
@@ -55,11 +60,54 @@ class IppClient {
             addAttribute(out, 0x21, "copies", copies.toString())
             addAttribute(out, 0x44, "sides", if (duplex) "two-sided-long-edge" else "one-sided")
             addAttribute(out, 0x44, "print-color-mode", if (colorMode == "Color") "color" else "monochrome")
-            if (pageRange != "All pages") addAttribute(out, 0x44, "page-ranges", pageRange)
+            if (pageRange != "All pages") addPageRanges(out, pageRange)
         }
+        val result = submitPdf(resolver, pdfUri, username, password, request)
+        if (!result.isOptionalAttributesError()) return result
+
+        // Older KHG/CUPS queues may reject optional print attributes. Retry the
+        // original minimal Print-Job request so printing still works while the
+        // editor remains available for queues that support those attributes.
+        val compatibilityRequest = makeRequest(0x0002, username) { out ->
+            addAttribute(out, 0x42, "job-name", "KHG Android PDF")
+            addAttribute(out, 0x49, "document-format", "application/pdf")
+        }
+        return submitPdf(resolver, pdfUri, username, password, compatibilityRequest)
+    }
+
+    private fun submitPdf(
+        resolver: ContentResolver,
+        pdfUri: Uri,
+        username: String,
+        password: String,
+        request: ByteArray
+    ): IppReply {
         val pdf = resolver.openInputStream(pdfUri) ?: error("Cannot open selected PDF")
         return pdf.use { post(username, password, request, it) }
     }
+
+    private fun addPageRanges(out: DataOutputStream, value: String) {
+        val ranges = value.split(',').map { token ->
+            val parts = token.trim().split('-', limit = 2)
+            require(parts.size <= 2 && parts.all { it.toIntOrNull() != null }) {
+                "Invalid page range: $token"
+            }
+            val start = parts[0].toInt()
+            val end = (parts.getOrNull(1)?.toInt() ?: start)
+            require(start > 0 && end >= start) { "Invalid page range: $token" }
+            start to end
+        }
+        ranges.forEachIndexed { index, (start, end) ->
+            val name = if (index == 0) "page-ranges" else ""
+            val nameBytes = name.toByteArray(Charsets.UTF_8)
+            out.writeByte(0x33) // rangeOfInteger
+            out.writeShort(nameBytes.size)
+            out.write(nameBytes)
+            out.writeInt(start)
+            out.writeInt(end)
+        }
+    }
+
 
     private fun makeRequest(
         operation: Int,

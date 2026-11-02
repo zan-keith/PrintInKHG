@@ -164,8 +164,18 @@ private fun PrintApp(activity: Activity) {
                         if (credentials == null || uri == null) { page = Page.LOGIN; return@OptionsScreen }
                         busy = true
                         scope.launch(Dispatchers.IO) {
-                            val result = runCatching { client.printPdf(credentials.first, credentials.second, activity.contentResolver, uri, pageRange.ifBlank { "All pages" }, copies, duplex, colorMode) }.getOrNull()
-                            kotlinx.coroutines.withContext(Dispatchers.Main) { busy = false; printSucceeded = result?.isSuccess() == true; activityStatus = if (printSucceeded) "Print job accepted · ${result?.summary()}" else "Print failed — check connection"; page = Page.RESULT }
+                            val attempt = runCatching { client.printPdf(credentials.first, credentials.second, activity.contentResolver, uri, pageRange.ifBlank { "All pages" }, copies, duplex, colorMode) }
+                            val result = attempt.getOrNull()
+                            kotlinx.coroutines.withContext(Dispatchers.Main) {
+                                busy = false
+                                printSucceeded = result?.isSuccess() == true
+                                activityStatus = when {
+                                    printSucceeded -> "Print job accepted · ${result?.summary()}"
+                                    result != null -> "Print rejected · ${result.summary()}"
+                                    else -> "Print failed · ${attempt.exceptionOrNull()?.message ?: "Could not reach the printer"}"
+                                }
+                                page = Page.RESULT
+                            }
                         }
                     }
                     Page.RESULT -> ResultScreen(printSucceeded, activityStatus) { page = Page.HOME }
