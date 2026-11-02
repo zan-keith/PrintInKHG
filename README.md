@@ -47,6 +47,10 @@ The app is organized into separate resident-facing pages: Home for starting a pr
 
 Android Back follows the page flow normally. Leaving the PDF preparation screen requires an explicit confirmation so that the current print settings are not lost accidentally.
 
+Newly selected PDFs default to black-and-white and double-sided printing; both settings can be changed before sending.
+
+Privacy and security notes are available in the app under About → EU privacy & data notes and in [SECURITY.md](SECURITY.md). The debug build is intentionally debuggable and is not a production security release.
+
 Since this app is unofficial, KHG administration may not be able to help with app-specific problems. Please raise an issue on GitHub or contact the developer directly at zankeith.contact@gmail.com.
 
 ## Important limitations

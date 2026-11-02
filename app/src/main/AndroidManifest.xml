@@ -7,6 +7,8 @@
         android:usesCleartextTraffic="false"
         android:icon="@drawable/ic_khg_logo"
         android:roundIcon="@drawable/ic_khg_logo"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
             android:name=".MainActivity"
