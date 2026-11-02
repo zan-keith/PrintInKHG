@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -15,6 +16,8 @@ import java.net.URL
  * Credentials remain only in memory while a request is made.
  */
 class IppClient {
+    private class HttpResponseException(val code: Int, message: String) : IOException(message)
+
     companion object {
         private const val ENDPOINT = "https://davinci.khg.jku.at:631/printers/P3055"
         private const val PRINTER_URI = "ipps://davinci.khg.jku.at:631/printers/P3055"
@@ -63,8 +66,11 @@ class IppClient {
         }
         val pdf = resolver.openInputStream(pdfUri)?.use { it.readBytes() }
             ?: error("Cannot open selected PDF")
-        val result = post(username, password, request, pdf)
-        if (!result.isOptionalAttributesError()) return result
+        val firstAttempt = runCatching { post(username, password, request, pdf) }
+        val result = firstAttempt.getOrNull()
+        val httpRetry = (firstAttempt.exceptionOrNull() as? HttpResponseException)?.code in setOf(400, 411)
+        if (result != null && !result.isOptionalAttributesError() && !httpRetry) return result
+        if (result == null && !httpRetry) throw firstAttempt.exceptionOrNull()!!
 
         // Older KHG/CUPS queues may reject optional print attributes. Retry the
         // original minimal Print-Job request so printing still works while the
@@ -162,7 +168,13 @@ class IppClient {
                 } else {
                     "Server returned HTTP $code (${connection.responseMessage})."
                 }
-                error(extra)
+                val body = connection.errorStream?.use { it.readBytes() }
+                    ?.toString(Charsets.UTF_8)
+                    ?.trim()
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.let { " Response: ${it.take(240)}" }
+                    .orEmpty()
+                throw HttpResponseException(code, extra + body)
             }
             val mime = connection.contentType.orEmpty().lowercase()
             if (!mime.startsWith("application/ipp")) {
