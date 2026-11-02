@@ -7,7 +7,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -62,7 +61,9 @@ class IppClient {
             addAttribute(out, 0x44, "print-color-mode", if (colorMode == "Color") "color" else "monochrome")
             if (pageRange != "All pages") addPageRanges(out, pageRange)
         }
-        val result = submitPdf(resolver, pdfUri, username, password, request)
+        val pdf = resolver.openInputStream(pdfUri)?.use { it.readBytes() }
+            ?: error("Cannot open selected PDF")
+        val result = post(username, password, request, pdf)
         if (!result.isOptionalAttributesError()) return result
 
         // Older KHG/CUPS queues may reject optional print attributes. Retry the
@@ -72,18 +73,7 @@ class IppClient {
             addAttribute(out, 0x42, "job-name", "KHG Android PDF")
             addAttribute(out, 0x49, "document-format", "application/pdf")
         }
-        return submitPdf(resolver, pdfUri, username, password, compatibilityRequest)
-    }
-
-    private fun submitPdf(
-        resolver: ContentResolver,
-        pdfUri: Uri,
-        username: String,
-        password: String,
-        request: ByteArray
-    ): IppReply {
-        val pdf = resolver.openInputStream(pdfUri) ?: error("Cannot open selected PDF")
-        return pdf.use { post(username, password, request, it) }
+        return post(username, password, compatibilityRequest, pdf)
     }
 
     private fun addPageRanges(out: DataOutputStream, value: String) {
@@ -141,7 +131,7 @@ class IppClient {
         out.write(v)
     }
 
-    private fun post(username: String, password: String, ippHeader: ByteArray, pdf: InputStream?): IppReply {
+    private fun post(username: String, password: String, ippHeader: ByteArray, pdf: ByteArray?): IppReply {
         val connection = (URL(ENDPOINT).openConnection() as HttpURLConnection).apply {
             connectTimeout = 12000
             readTimeout = 30000
@@ -156,13 +146,12 @@ class IppClient {
                 "Basic " + Base64.encodeToString(creds, Base64.NO_WRAP)
             )
             creds.fill(0)
-            if (pdf == null) setFixedLengthStreamingMode(ippHeader.size)
-            else setChunkedStreamingMode(8192)
+            setFixedLengthStreamingMode(ippHeader.size + (pdf?.size ?: 0))
         }
         try {
             connection.outputStream.use { output ->
                 output.write(ippHeader)
-                if (pdf != null) pdf.copyTo(output, bufferSize = 8192)
+                if (pdf != null) output.write(pdf)
             }
             val code = connection.responseCode
             if (code !in 200..299) {
