@@ -45,6 +45,8 @@ The configured printer endpoint and queue may change over time. If the app stops
 
 The app is organized into separate resident-facing pages: Home for starting a print, Connect for network and printer setup, Tutorial for the four-step walkthrough, Settings for login/logout, and About for app behavior, privacy, debug details, and developer information.
 
+Android Back follows the page flow normally. Leaving the PDF preparation screen requires an explicit confirmation so that the current print settings are not lost accidentally.
+
 Since this app is unofficial, KHG administration may not be able to help with app-specific problems. Please raise an issue on GitHub or contact the developer directly at zankeith.contact@gmail.com.
 
 ## Important limitations

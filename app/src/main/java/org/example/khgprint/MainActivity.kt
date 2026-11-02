@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -71,6 +72,8 @@ private fun PrintApp(activity: Activity) {
     var duplex by rememberSaveable { mutableStateOf(false) }
     var colorMode by rememberSaveable { mutableStateOf("Color") }
     var printSucceeded by rememberSaveable { mutableStateOf(false) }
+    var confirmEditorExit by rememberSaveable { mutableStateOf(false) }
+    var loginReturnPage by rememberSaveable { mutableStateOf(Page.HOME) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         pdf = uri
@@ -88,7 +91,35 @@ private fun PrintApp(activity: Activity) {
         savedLoaded = true
     }
 
-    val openLogin = { page = Page.LOGIN; error = null }
+    BackHandler(enabled = page != Page.HOME) {
+        if (page == Page.EDITOR) {
+            confirmEditorExit = true
+        } else {
+            page = when (page) {
+                Page.CONNECT -> Page.HOME
+                Page.TUTORIAL -> Page.CONNECT
+                Page.SETTINGS -> Page.HOME
+                Page.ABOUT -> Page.SETTINGS
+                Page.LOGIN -> loginReturnPage
+                Page.OPTIONS -> Page.EDITOR
+                Page.RESULT -> Page.HOME
+                else -> Page.HOME
+            }
+        }
+    }
+
+    if (confirmEditorExit) {
+        AlertDialog(
+            onDismissRequest = { confirmEditorExit = false },
+            icon = { Icon(Icons.Default.WarningAmber, null, tint = Color(0xffd98745)) },
+            title = { Text("Leave PDF editor?") },
+            text = { Text("Your current page range, copies, and print settings will be discarded. The original PDF will not be changed.") },
+            confirmButton = { TextButton(onClick = { confirmEditorExit = false; page = Page.HOME }) { Text("Leave editor", color = MaterialTheme.colorScheme.error) } },
+            dismissButton = { TextButton(onClick = { confirmEditorExit = false }) { Text("Stay") } }
+        )
+    }
+
+    val openLogin = { loginReturnPage = page; page = Page.LOGIN; error = null }
     val openPdf = {
         if (store.hasCredentials()) picker.launch(arrayOf("application/pdf")) else openLogin()
     }
