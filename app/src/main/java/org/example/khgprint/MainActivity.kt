@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -82,7 +83,7 @@ private fun PrintApp(activity: Activity) {
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         pdf = uri
-        fileName = uri.lastPathSegment?.substringAfterLast('/') ?: "Selected PDF"
+        fileName = displayName(activity.contentResolver, uri)
         pageRange = ""
         copies = 1
         duplex = true
@@ -289,6 +290,16 @@ private fun PrintApp(activity: Activity) {
 
 private fun openExternal(activity: Activity, value: String) {
     runCatching { activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(value))) }
+}
+
+private fun displayName(resolver: android.content.ContentResolver, uri: Uri): String {
+    resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+        if (cursor.moveToFirst()) {
+            val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (index >= 0) cursor.getString(index)?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+    }
+    return uri.lastPathSegment?.substringAfterLast('/') ?: "Selected PDF"
 }
 
 private val KHGBackground=Color(0xfff7f8fa); private val KHGInk=Color(0xff172033); private val KHGTeal=Color(0xff168c83); private val KHGMuted=Color(0xff667085)
