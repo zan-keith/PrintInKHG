@@ -39,10 +39,13 @@ The in-app setup page links to the resident resources below:
 - KHG-Dormlife: https://khg-dormlife.club/
 - Internal mailing list: tratsch@khg.jku.at (residents are automatically assigned)
 - Questions or problems: admin@khg.jku.at, or contact one of the admins directly
+- App developer help: zankeith.contact@gmail.com
 
 The configured printer endpoint and queue may change over time. If the app stops connecting, check the current KHG instructions or contact an admin; do not assume that the old URL or queue name is still valid.
 
 The app is organized into separate resident-facing pages: Home for starting a print, Connect for network and printer setup, Tutorial for the four-step walkthrough, Settings for login/logout, and About for app behavior, privacy, debug details, and developer information.
+
+Since this app is unofficial, KHG administration may not be able to help with app-specific problems. Please raise an issue on GitHub or contact the developer directly at zankeith.contact@gmail.com.
 
 ## Important limitations
 - **Not tested on the KHG network, a device, or Android SDK.** It is source code, not a tested APK.
