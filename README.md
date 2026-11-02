@@ -42,6 +42,8 @@ The in-app setup page links to the resident resources below:
 
 The configured printer endpoint and queue may change over time. If the app stops connecting, check the current KHG instructions or contact an admin; do not assume that the old URL or queue name is still valid.
 
+The app is organized into separate resident-facing pages: Home for starting a print, Connect for network and printer setup, Tutorial for the four-step walkthrough, Settings for login/logout, and About for app behavior, privacy, debug details, and developer information.
+
 ## Important limitations
 - **Not tested on the KHG network, a device, or Android SDK.** It is source code, not a tested APK.
 - Supports HTTP Basic authentication only. If the server responds with `WWW-Authenticate: Digest`, add a correct Digest handler or a vetted compatible IPP client. Never disable authentication.
